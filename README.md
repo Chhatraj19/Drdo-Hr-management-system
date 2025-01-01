@@ -55,17 +55,6 @@ Ensure you have the following installed on your system:
    JWT_SECRET=your_secret_key
    ```
 
-6. Start the server:
-   ```bash
-   npm start
-   ```
-
-7. Start the React app:
-   ```bash
-   cd client
-   npm start
-   ```
-
 ## Usage
 1. Open the application in your browser (default URL: `http://localhost:3000`).
 2. Use the provided interface to manage employees:
@@ -88,7 +77,6 @@ Ensure you have the following installed on your system:
 - Employee data is encrypted using hash functions to protect sensitive information.
 - Custom JWT tokens are used for secure authentication and session management.
 ![Screenshot 2024-12-28 185312](https://github.com/user-attachments/assets/4508f2f4-b647-4760-b183-c336023de5e9)
-![Screenshot 2024-12-28 185728](https://github.com/user-attachments/assets/57b40bb8-a42b-4351-8ee8-ef89ea946d87)
 ![Screenshot 2024-12-28 185713](https://github.com/user-attachments/assets/3fe1bf9e-9d00-4ed2-982d-caaa1237c566)
 
 
