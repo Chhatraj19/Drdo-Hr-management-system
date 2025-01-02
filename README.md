@@ -10,6 +10,7 @@ The HR Management System is a comprehensive application designed to streamline t
 - **Data Encryption**: Hash functions to ensure sensitive employee data is encrypted.
 - **Router Implementation**: Dynamic routing for seamless navigation within the system.
 - **RESTful APIs**: Axios for handling HTTP requests between the client and server.
+- **Server Used:**: Apache
 
 ## Tech Stack
 - **Frontend**: React, Axios
