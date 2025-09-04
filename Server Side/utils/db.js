@@ -1,19 +1,16 @@
-import mysql from 'mysql'
+import mongoose from "mongoose";
 
-const con = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "", 
-    database: "employeems"
-})
+const connectDB = async () => {
+  try {
+    await mongoose.connect("mongodb://127.0.0.1:27017/hrmanagement", {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("✅ MongoDB Connected");
+  } catch (error) {
+    console.error("❌ MongoDB Connection Error:", error);
+    process.exit(1);
+  }
+};
 
-con.connect(function(err) {
-    if(err) {
-        console.log("connection error")
-    } else {
-        console.log("Connected")
-    }
-})
-
-export default con;
-
+export default connectDB;
