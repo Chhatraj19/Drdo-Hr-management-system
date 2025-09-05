@@ -14,7 +14,7 @@ const Login = () => {
     axios.defaults.withCredentials = true;
     const handleSubmit = (event) => {
         event.preventDefault()
-        axios.post('http://localhost:3000/auth/adminlogin', values)
+        axios.post('/admin/login', values)
         .then(result => {
             if(result.data.loginStatus) {
                 localStorage.setItem("valid", true)
@@ -23,7 +23,17 @@ const Login = () => {
                 setError(result.data.Error)
             }
         })
-        .catch(err => console.log(err))
+        .catch(err => {
+            console.error("AXIOS ERROR", err);              // existing stack
+            if (err.response) {
+    // server responded with a status (500) and maybe a JSON body
+                console.error("Server status:", err.response.status);
+                console.error("Server body:", err.response.data);
+                setError(err.response.data?.Error || "Server error");
+            } else {
+                setError("Network or CORS error");
+            }
+        });
     }
 
   return (
@@ -47,7 +57,7 @@ const Login = () => {
                 <button className='btn btn-success w-100 rounded-0 mb-2'>Log in</button>
                 <div className='mb-1'> 
                     <input type="checkbox" name="tick" id="tick" className='me-2'/>
-                    <label htmlFor="password">You are Agree with terms & conditions</label>
+                    <label htmlFor="password">You Agree with terms & conditions</label>
                 </div>
             </form>
         </div>

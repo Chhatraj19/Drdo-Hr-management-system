@@ -18,8 +18,27 @@ connectDB();
 app.use(express.json());
 app.use(cookieParser());
 
+// ------------------ VERIFY ROUTE ------------------
+app.get("/verify", (req, res) => {
+  try {
+    const token = req.cookies?.token;
+    if (!token) return res.json({ Status: false, Error: "No token" });
+
+    // verify token (use same secret you sign with)
+    const payload = jwt.verify(token, "jwt_secret_key");
+    return res.json({
+      Status: true,
+      role: payload.role,
+      id: payload.id,
+      email: payload.email,
+    });
+  } catch (err) {
+    return res.json({ Status: false, Error: err.message });
+  }
+});
+
 // CORS configuration — change FRONTEND_ORIGIN to match your frontend dev server
-const FRONTEND_ORIGIN = "http://localhost:5173"; // <-- set this to your frontend origin (Vite:5173, CRA:3000)
+const FRONTEND_ORIGIN = "http://localhost:5000"; // <-- set this to your frontend origin (Vite:5173, CRA:3000)
 
 // Configure CORS to allow credentials (cookies) if needed
 app.use(cors({
@@ -48,7 +67,7 @@ app.use("/employee", EmployeeRoute);
 
 // Helper for __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const _dirname = path.dirname(_filename);
 
 // If you're using Vite (build output -> client/dist)
 const viteBuildPath = path.join(__dirname, "client", "dist");
@@ -71,7 +90,7 @@ app.get('*', (req, res, next) => {
 // ---------------------------------------------------------------------------
 
 // Start server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
