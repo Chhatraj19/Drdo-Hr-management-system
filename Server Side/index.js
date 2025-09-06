@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
+import jwt from "jsonwebtoken"; // <-- you were using jwt.verify but hadn't imported it
 
 import connectDB from "./utils/db.js";
 import AdminRoute from "./Routes/AdminRoute.js";
@@ -18,13 +19,27 @@ connectDB();
 app.use(express.json());
 app.use(cookieParser());
 
+// ---------- CORS: allow ANY origin (with credentials) ----------
+const corsOptions = {
+  origin: (origin, callback) => {
+    // allow requests with no origin (like mobile apps, curl) or any origin
+    callback(null, true);
+  },
+  credentials: true, // allow cookies / Authorization headers cross-site
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+};
+app.use(cors(corsOptions));
+// Preflight for all routes
+app.options("*", cors(corsOptions));
+// ---------------------------------------------------------------
+
 // ------------------ VERIFY ROUTE ------------------
 app.get("/verify", (req, res) => {
   try {
     const token = req.cookies?.token;
     if (!token) return res.json({ Status: false, Error: "No token" });
 
-    // verify token (use same secret you sign with)
     const payload = jwt.verify(token, "jwt_secret_key");
     return res.json({
       Status: true,
@@ -37,24 +52,7 @@ app.get("/verify", (req, res) => {
   }
 });
 
-// CORS configuration — change FRONTEND_ORIGIN to match your frontend dev server
-const FRONTEND_ORIGIN = "http://localhost:5000"; // <-- set this to your frontend origin (Vite:5173, CRA:3000)
-
-// Configure CORS to allow credentials (cookies) if needed
-app.use(cors({
-  origin: FRONTEND_ORIGIN,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true, // allow cookies / withCredentials
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
-
-// Explicitly handle preflight requests for all routes
-app.options('*', cors({
-  origin: FRONTEND_ORIGIN,
-  credentials: true
-}));
-
-// Static "Public" folder (unchanged)
+// Static "Public" folder
 app.use("/Public", express.static("Public"));
 
 // API routes
@@ -62,32 +60,22 @@ app.use("/admin", AdminRoute);
 app.use("/employee", EmployeeRoute);
 
 // ---------- Optional: Serve frontend build (one-server deployment) ----------
-// If you build the frontend (Vite default -> dist, CRA -> build), uncomment the appropriate block
-// to serve static files from Express. This makes frontend and backend same-origin (no CORS needed).
-
-// Helper for __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
-const _dirname = path.dirname(_filename);
+const __dirname = path.dirname(__filename);
 
 // If you're using Vite (build output -> client/dist)
 const viteBuildPath = path.join(__dirname, "client", "dist");
 
-// If you're using Create React App (build output -> client/build)
-// const craBuildPath = path.join(__dirname, "client", "build");
-
 // Serve Vite build if exists (uncomment if you built frontend with Vite)
 app.use(express.static(viteBuildPath));
-app.get('*', (req, res, next) => {
-  // Only send index.html for routes that are not API endpoints
-  if (req.path.startsWith('/admin') || req.path.startsWith('/employee') || req.path.startsWith('/api')) {
-    return next(); // let API routes handle it
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/admin") || req.path.startsWith("/employee") || req.path.startsWith("/api")) {
+    return next();
   }
-  res.sendFile(path.join(viteBuildPath, 'index.html'), err => {
+  res.sendFile(path.join(viteBuildPath, "index.html"), (err) => {
     if (err) next();
   });
 });
-
-// ---------------------------------------------------------------------------
 
 // Start server
 const PORT = process.env.PORT || 8000;

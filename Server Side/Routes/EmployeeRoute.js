@@ -70,6 +70,41 @@ router.get("/salary", async (req, res) => {
   }
 });
 
+router.post("/employee_login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ Status: false, Error: "Email and password are required" });
+    }
+
+    // If your Employee schema has password select:false, this will include it; if not, it's harmless.
+    const employee = await Employee.findOne({ email }).select("+password");
+    if (!employee) {
+      return res.status(401).json({ Status: false, Error: "Invalid credentials" });
+    }
+
+    const ok = await bcrypt.compare(password, employee.password);
+    if (!ok) {
+      return res.status(401).json({ Status: false, Error: "Invalid credentials" });
+    }
+
+    // Don't send the hashed password back
+    const safeEmployee = {
+      _id: employee._id,
+      name: employee.name,
+      email: employee.email,
+      address: employee.address,
+      salary: employee.salary,
+      image: employee.image,
+      category_id: employee.category_id,
+    };
+
+    return res.json({ Status: true, Result: safeEmployee });
+  } catch (err) {
+    return res.status(500).json({ Status: false, Error: err.message });
+  }
+});
+
 // ------------------ UPDATE EMPLOYEE ------------------
 router.put("/edit/:id", async (req, res) => {
   try {
